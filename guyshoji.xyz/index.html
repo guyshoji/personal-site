@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guy Shoji</title>
+  <meta name="description" content="Guy Shoji — writing and work.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✎</text></svg>">
+  <style>
+    :root {
+      --bg: #fdfdfb;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --link: #1a1a1a;
+      --rule: #e4e4e0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141414;
+        --text: #e8e8e6;
+        --muted: #9a9a96;
+        --link: #e8e8e6;
+        --rule: #2c2c2a;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+    main {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 72px 20px 96px;
+    }
+    h1 {
+      font-size: 1.6rem;
+      font-weight: normal;
+      margin: 0 0 1.5rem;
+      letter-spacing: 0.01em;
+    }
+    h2 {
+      font-size: 0.8rem;
+      font-weight: normal;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin: 3rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    p { margin: 0 0 1rem; }
+    a {
+      color: var(--link);
+      text-decoration: underline;
+      text-decoration-color: var(--muted);
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+    }
+    a:hover { text-decoration-color: var(--text); }
+    ul.writing { list-style: none; padding: 0; margin: 0; }
+    ul.writing li { margin: 0 0 1.25rem; }
+    .meta { display: block; color: var(--muted); font-size: 0.9rem; }
+    .links a { margin-right: 1.25rem; }
+    footer { margin-top: 4rem; color: var(--muted); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Guy Shoji</h1>
+
+    <!-- A short bio. Two or three sentences is plenty. -->
+    <p>
+      I'm a [what you do] based in [city]. I'm interested in [topics you care about].
+    </p>
+    <p>
+      This is where I keep my writing.
+    </p>
+
+    <h2>Writing</h2>
+    <!--
+      TO ADD A NEW PIECE:
+      1. Put the PDF in the "writing" folder (e.g. writing/my-essay.pdf).
+      2. Copy one <li>…</li> block below, paste it at the top of the list,
+         and change the link, title, and date/description.
+    -->
+    <ul class="writing">
+      <li>
+        <a href="writing/example-essay.pdf">Title of an essay</a>
+        <span class="meta">2026 · A one-line description of what it's about.</span>
+      </li>
+      <li>
+        <a href="writing/example-paper.pdf">Title of a paper</a>
+        <span class="meta">2025 · Where it was published, or a short note.</span>
+      </li>
+    </ul>
+
+    <h2>Elsewhere</h2>
+    <p class="links">
+      <!-- Delete any you don't want. -->
+      <a href="mailto:you@example.com">Email</a>
+      <a href="https://www.linkedin.com/in/your-handle">LinkedIn</a>
+      <a href="https://github.com/your-handle">GitHub</a>
+    </p>
+
+    <footer>© 2026 Guy Shoji</footer>
+  </main>
+</body>
+</html>
