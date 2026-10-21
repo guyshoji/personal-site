@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Proof of Life · Guy Shoji</title>
+  <meta name="description" content="Photos.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✎</text></svg>">
+  <style>
+    :root {
+      --bg: #fdfdfb;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --link: #1a1a1a;
+      --rule: #e4e4e0;
+      --gap: 12px;       /* space between photos, on every side */
+      --row-h: 280px;    /* target row height; rows stretch slightly to fill the width */
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141414;
+        --text: #e8e8e6;
+        --muted: #9a9a96;
+        --link: #e8e8e6;
+        --rule: #2c2c2a;
+      }
+    }
+    @media (max-width: 600px) {
+      :root { --gap: 8px; --row-h: 150px; }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+    header {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 72px 20px 0;
+    }
+    h1 {
+      font-size: 1.6rem;
+      font-weight: normal;
+      margin: 0 0 2rem;
+      letter-spacing: 0.01em;
+    }
+    a {
+      color: var(--link);
+      text-decoration: underline;
+      text-decoration-color: var(--muted);
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+    }
+    a:hover { text-decoration-color: var(--text); }
+    .back { display: inline-block; margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--muted); }
+    .meta { color: var(--muted); font-size: 0.9rem; }
+
+    /* Justified gallery: the script groups photos into rows and sizes each
+       row so it spans the full width with every photo the same height.
+       The same --gap separates photos horizontally and vertically. */
+    .gallery {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+    }
+    .gallery .row {
+      display: flex;
+      gap: var(--gap);
+    }
+    .gallery a {
+      display: block;
+      flex: none;
+      background: var(--rule);
+    }
+    .gallery img {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    footer {
+      max-width: 620px;
+      margin: 4rem auto 0;
+      padding: 0 20px 96px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back" href="index.html">← Guy Shoji</a>
+    <h1>Proof of Life</h1>
+  </header>
+
+  <!--
+    This gallery builds itself from the images in the "photos" folder.
+    Supported: .jpg .jpeg .png .gif .webp .avif  (iPhone .HEIC won't display; export as JPEG)
+    Order: random, reshuffled on every page load.
+  -->
+  <main class="gallery" id="gallery">
+    <p class="meta">Loading…</p>
+  </main>
+  <noscript><p class="meta" style="text-align:center">Turn on JavaScript to see the photos.</p></noscript>
+
+  <footer>© 2026 Guy Shoji</footer>
+
+  <script>
+    // Lists the images in the repo's photos/ folder via the GitHub API.
+    const REPO = "guyshoji/personal-site";
+    const FOLDER = "photos";
+    const IMAGE = /\.(jpe?g|png|gif|webp|avif)$/i;
+
+    const gallery = document.getElementById("gallery");
+    let tiles = [];  // { el, ratio }; ratio is width / height, guessed until the photo loads
+
+    // Packs photos into rows at roughly --row-h tall, then scales each row
+    // so it exactly fills the width. The last row stays at --row-h.
+    function layout() {
+      if (!tiles.length) return;
+      const css = getComputedStyle(document.documentElement);
+      const gap = parseFloat(css.getPropertyValue("--gap"));
+      const target = parseFloat(css.getPropertyValue("--row-h"));
+      const style = getComputedStyle(gallery);
+      const width = gallery.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      const heightFor = row => (width - gap * (row.length - 1)) / row.reduce((s, t) => s + t.ratio, 0);
+
+      const rows = [];
+      let row = [];
+      for (const t of tiles) {
+        row.push(t);
+        if (heightFor(row) <= target) {
+          // Row is full. Drop the last photo to the next row if that fits closer to the target height.
+          if (row.length > 1 && heightFor(row.slice(0, -1)) - target < target - heightFor(row)) {
+            rows.push({ tiles: row.slice(0, -1), h: heightFor(row.slice(0, -1)) });
+            row = [t];
+          } else {
+            rows.push({ tiles: row, h: heightFor(row) });
+            row = [];
+          }
+        }
+      }
+      if (row.length) rows.push({ tiles: row, h: Math.min(target, heightFor(row)) });
+
+      const frag = document.createDocumentFragment();
+      for (const r of rows) {
+        const div = document.createElement("div");
+        div.className = "row";
+        for (const t of r.tiles) {
+          t.el.style.width = (r.h * t.ratio) + "px";
+          t.el.style.height = r.h + "px";
+          div.appendChild(t.el);
+        }
+        frag.appendChild(div);
+      }
+      gallery.replaceChildren(frag);
+    }
+
+    let pending = 0;
+    function relayout() {
+      clearTimeout(pending);
+      pending = setTimeout(layout, 30);
+    }
+    window.addEventListener("resize", relayout);
+
+    function render(files) {
+      const photos = files.filter(f => f.type === "file" && IMAGE.test(f.name));
+      // Shuffle so the order is different on every visit.
+      for (let i = photos.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [photos[i], photos[j]] = [photos[j], photos[i]];
+      }
+      if (!photos.length) {
+        gallery.innerHTML = '<p class="meta">Nothing here yet.</p>';
+        return;
+      }
+      tiles = photos.map(f => {
+        const src = FOLDER + "/" + encodeURIComponent(f.name);
+        const a = document.createElement("a");
+        a.href = src;
+        a.target = "_blank";
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "";
+        img.loading = "lazy";
+        img.decoding = "async";
+        a.appendChild(img);
+        const tile = { el: a, ratio: 1.5 };
+        img.addEventListener("load", () => {
+          tile.ratio = img.naturalWidth / img.naturalHeight;
+          relayout();
+        });
+        return tile;
+      });
+      layout();
+    }
+
+    (async () => {
+      const key = "photo-list";
+      try {
+        const cached = sessionStorage.getItem(key);
+        if (cached) return render(JSON.parse(cached));
+      } catch (e) {}
+      try {
+        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FOLDER}`);
+        const files = res.status === 404 ? [] : await res.json();
+        if (!Array.isArray(files)) throw new Error("Unexpected response");
+        try { sessionStorage.setItem(key, JSON.stringify(files)); } catch (e) {}
+        render(files);
+      } catch (e) {
+        document.getElementById("gallery").innerHTML =
+          '<p class="meta">Couldn’t load the photos right now. Please refresh in a minute.</p>';
+      }
+    })();
+  </script>
+</body>
+</html>
