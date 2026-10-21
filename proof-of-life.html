@@ -37,8 +37,9 @@
       font-size: 18px;
       line-height: 1.6;
     }
+    /* Same width and padding as .gallery, so the header lines up with the photos' left edge. */
     header {
-      max-width: 620px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 72px 20px 0;
     }
@@ -191,7 +192,10 @@
         img.loading = "lazy";
         img.decoding = "async";
         a.appendChild(img);
-        const tile = { el: a, ratio: 1.5 };
+        // shrink-photos.ps1 names files like IMG_1466_1600x1200.jpg, which gives the
+        // shape up front. Other photos start as 3:2 and adjust once they load.
+        const size = f.name.match(/_(\d+)x(\d+)\.\w+$/);
+        const tile = { el: a, ratio: size ? size[1] / size[2] : 1.5 };
         img.addEventListener("load", () => {
           tile.ratio = img.naturalWidth / img.naturalHeight;
           relayout();
